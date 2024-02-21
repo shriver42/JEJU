@@ -11,18 +11,18 @@ agency$cost = as.integer(agency$cost)
 agency = agency[1:5]
 
 # 관광지
-jeju = read.csv("C:/Temp/comprog/place.csv", header=T)
+jeju = read.csv("place.csv", header=T)
 jeju_T = as.data.frame(jeju)
 
 # 맛집
-food = read.csv("C:/Temp/comprog/food.csv", header=T)
+food = read.csv("food.csv", header=T)
 
 # 교통편
-jejuair = read.table("C:/Temp/comprog/travel1.txt", header=T)
-jejuvessel = read.table("C:/Temp/comprog/travel2.txt", header=T)
+jejuair = read.table("travel1.txt", header=T)
+jejuvessel = read.table("travel2.txt", header=T)
 
 # 숙소
-sleep = read.csv(file="C:/Temp/comprog/sleep.csv", header=T)
+sleep = read.csv(file="sleep.csv", header=T)
 sleep = na.omit(sleep)
 
 
