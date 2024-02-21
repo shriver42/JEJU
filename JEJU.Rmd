@@ -1,0 +1,373 @@
+---
+title: "Project_jeju"
+output: word_document
+---
+1
+```{r}
+1
+#각 데이터 입력받기
+agency = read.csv("C:/Temp/comprog/agency.csv",header=T)
+agency$cost = as.integer(agency$cost)
+agency = agency[1:5]
+
+# 관광지
+jeju = read.csv("C:/Temp/comprog/place.csv", header=T)
+jeju_T = as.data.frame(jeju)
+
+# 맛집
+food = read.csv("C:/Temp/comprog/food.csv", header=T)
+
+# 교통편
+jejuair = read.table("C:/Temp/comprog/travel1.txt", header=T)
+jejuvessel = read.table("C:/Temp/comprog/travel2.txt", header=T)
+
+# 숙소
+sleep = read.csv(file="C:/Temp/comprog/sleep.csv", header=T)
+sleep = na.omit(sleep)
+
+
+#여행패키지 옵션을 선택했을 시, 함수 입력
+
+# 패키지 형태 선택
+package = function(x){
+    repeat {
+      rep=0
+
+      Q1_1 = menu(c(
+        paste("렌터카+호텔 (",nrow(agency[agency$content=="렌터카+호텔",]),")"), 
+        paste("버스관광 (",nrow(agency[agency$content=="버스관광",]),")"), 
+        paste("항공+렌터카+호텔 (",nrow(agency[agency$content=="항공+렌터카+호텔",]),")"), 
+        "상관 없음"), graphics=FALSE, title = "원하는 패캐지 형태를 선택하시오")
+      
+      result1 = switch (Q1_1,
+              "1" = agency[agency$content=="렌터카+호텔",],
+              "2" = agency[agency$content=="버스관광",],
+              "3" = agency[agency$content=="항공+렌터카+호텔",],
+              agency)
+
+      if (nrow(result1)<1){
+        rep = menu (c("예", "아니오"), graphics=FALSE, title="원하시는 패키지가 없습니다. 다시 시작하시겠습니까?")
+      }
+      
+      if (rep==1) next
+      if (rep==2) break
+      
+ # 여행일수 선택
+      Q1_2 = menu(c(
+        paste("0박 1일 (",nrow(result1[result1$days==1,]),")"), 
+        paste("1박 2일 (",nrow(result1[result1$days==2,]),")"),
+        paste("2박 3일 (",nrow(result1[result1$days==3,]),")"),
+        paste("3박 4일 (",nrow(result1[result1$days==4,]),")"),
+        "상관 없음"), graphics=FALSE, title="원하는 여행일수를 고르시오")
+        
+      result2 = switch(Q1_2,
+             "1" = result1[result1$days==1,],
+             "2" = result1[result1$days==2,],
+             "3" = result1[result1$days==3,],
+             "4" = result1[result1$days==4,],
+             result1)
+
+#다시 시작 여부 묻기
+      if (nrow(result2)<1){
+        rep = menu (c("예", "아니오"), graphics=FALSE, title="원하시는 패키지가 없습니다. 다시 시작하시겠습니까?")
+      }
+      
+      if (rep==1) next
+      if (rep==2) break
+      
+# 가격대 선택
+      Q1_3 = menu(c(
+        paste("100,000~200,000원 (",nrow(result2[result2$cost>100000 & result2$cost<=200000,]),")"), 
+        paste("200,000~300,000원 (",nrow(result2[result2$cost>200000 & result2$cost<=300000,]),")"), 
+        paste("300,000~400,000원 (",nrow(result2[result2$cost>300000 & result2$cost<=400000,]),")"), 
+        paste("400,000~500,000원 (",nrow(result2[result2$cost>400000 & result2$cost<=500000,]),")"), 
+        paste("500,000원 이상 (",nrow(result1[result2$cost>500000,]),")"), 
+        "상관 없음"), graphics=FALSE, title = "원하는 가격대를 고르시오")
+          
+          
+      result3 = switch(Q1_3,
+             "1" = result2[result2$cost>100000 & result2$cost<=200000,],
+             "2" = result2[result2$cost>200000 & result2$cost<=300000,],
+             "3" = result2[result2$cost>300000 & result2$cost<=400000,],
+             "4" = result2[result2$cost>400000 & result2$cost<=500000,],
+             "5" = result2[result2$cost>500000,],
+             result2)
+          
+      a = t(result3[1])
+      if (nrow(result3)<1){
+        rep = menu (c("예", "아니오"), graphics=FALSE, title="원하시는 패키지가 없습니다. 다시 시작하시겠습니까?")
+      }
+      
+      if (rep==1) next
+      if (rep==2) break
+      
+      break
+    }
+  return(result3[,c(1,5)])
+}
+
+
+#개인여행 옵션을 선택했을 시, 함수 입력
+
+# 교통편
+travel_method = function(x){
+#출발지 입력 (비행기)
+  if(x==1){
+    Q5_1_1_1 = menu(c("서울/김포","군산","부산/김해","여수","대구","광주","울산","양양","무안","원주","진주/사천","청주","포항"),
+                    graphics=FALSE,title="출발지를 입력하세요.")
+    Q5_1_1 = c("서울/김포","군산","부산/김해","여수","대구","광주","울산","양양","무안","원주","진주/사천","청주","포항")[Q5_1_1_1]
+
+#출발 시간, 인원 입력
+    Q5_1_2 = readline("몇 시 출발 예정입니까?")
+    Q5_1_3 = readline("몇 분 출발 예정입니까?")
+    Q5_1_4 = readline("성인은 몇명입니까?")
+    Q5_1_5 = readline("소아는 몇명입니까?")
+    Q5_1_6 = readline("유아는 몇명입니까?")
+
+    Ans5_1_1 = Q5_1_1
+    Ans5_1_2 = as.numeric(Q5_1_2)
+    Ans5_1_3 = as.numeric(Q5_1_3)
+    Ans5_1_4 = as.numeric(Q5_1_4)
+    Ans5_1_5 = as.numeric(Q5_1_5)
+    Ans5_1_6 = as.numeric(Q5_1_6)
+
+  # x에 출발지""입력,y에 출발시간(6-21시),z에 출발시간(1-59분)입력하기
+  # 성인a명(만 13세 이상),소아b명(만 13세 미만 만 2세 이상),유아c명(24개월이상)으로입력
+    
+    gotojeju1=function(x,y,z,a,b,c){
+      answer5_1_1=""
+      
+      if(z<30 & z>=0){
+        answer5_1_1=jejuair[(jejuair$departure==x & jejuair$time==y),]
+      }else if(z==30){
+        answer5_1_1=jejuair[(jejuair$departure==x&(jejuair$time==y|jejuair$time==y+1)),]
+      }else if(z>30 & z<60){
+        answer5_1_1=jejuair[(jejuair$departure==x&jejuair$time==(y+1)),]
+      }else {
+        stop("시간/분을 정해진 양식에 맞게 다시 작성하여 주십시오")
+      }
+      
+      n=nrow(answer5_1_1)
+      answer5_1_2=""
+      
+      for(i in 1:n){
+      if(a+b+c >answer5_1_1[i,]$seat){
+        answer5_1_2[i]=("해당하는 항공편에 잔여석이 없습니다")
+      } else {
+        pricetag<-(a*answer5_1_1[i,]$price + b*answer5_1_1[i,]$price*0.9)
+        answer5_1_2[i]=paste("성인",a,"명, 소아",b,"명, 유아",c,"명에 해당하는 가격은",pricetag,"원입니다.")
+      }
+        
+      result = paste("추천하는 항공편입니다. 항공사", answer5_1_1[i,]$airline, ", 출발하는 공항", answer5_1_1[i,]$departure,
+                  ", 출발 시간",answer5_1_1[i,]$time,"시입니다.",answer5_1_2[i])
+      }
+      return(result)
+    }
+    
+    travel_result = gotojeju1(Ans5_1_1,Ans5_1_2,Ans5_1_3,Ans5_1_4,Ans5_1_5,Ans5_1_6)
+ 
+#출발지 (배), 인원 입력   
+  } else if (x==2){
+    Q5_2_1_1=menu(c("늑동항","목포항","여수엑스포항","완도항","진도항"), graphics=FALSE, title="출발지를 입력하세요.")
+    Q5_2_1=c("늑동항","목포항","여수엑스포항","완도항","진도항")[Q5_2_1_1]
+    Q5_2_2=readline("성인은 몇명입니까?")
+    Q5_2_3=readline("소아는 몇명입니까?")
+    Q5_2_4=readline("유아는 몇명입니까?")
+    
+    Ans5_2_1<-Q5_2_1
+    Ans5_2_2<-as.numeric(Q5_2_2)
+    Ans5_2_3<-as.numeric(Q5_2_3)
+    Ans5_2_4<-as.numeric(Q5_2_4)
+    
+    #이때 x에 출발지 입력
+    gotojeju2 = function(x,a,b,c){
+      answer5_2_1 = ""
+      
+      answer5_2_1 = jejuvessel[jejuvessel$departure==x,]
+      n = nrow(answer5_2_1)
+      answer5_2_2 = ""
+          
+      for(i in 1:n){
+        if((a+b+c) >answer5_2_1[i,]$seat){
+          answer5_2_2[i]=("해당하는 배편에 잔여석이 없습니다")
+        } else {
+          pricetag<-(a*answer5_2_1[i,]$price + b*answer5_2_1[i,]$price*0.7)
+          answer5_2_2[i]=paste("성인",a,"명, 소아",b,"명, 유아",c,"명에 해당하는 가격은",pricetag,"원입니다.")
+        }
+        
+        result = paste0("추천하는 배편입니다. 선박사  ",answer5_2_1[i,]$vesselname,", 출발하는 선박장  ",answer5_2_1[i,]$departure,", 출발 시간",
+                     answer5_2_1[i,]$time,"시입니다.",answer5_2_2[i])
+      }
+      return(result)
+    }
+    
+    travel_result = gotojeju2(Ans5_2_1, Ans5_2_2, Ans5_2_3, Ans5_2_4)
+  }
+  return(travel_result)
+}
+
+# 숙소
+lodging = function(x){
+  while(TRUE){
+ #숙소 지역 입력
+    Q3_1 = menu(c("제주시","서귀포시"), graphics=FALSE, title="어느 지역의 숙소를 원하십니까?")
+    if(Q3_1==1) data1 = place[which(sleep[,6]==0),]
+    if(Q3_1==2) data1 = place[which(sleep[,6]==1),]
+
+ #원하는 숙소 스타일 입력
+    Q3_2 = menu(c("호텔","펜션","리조트","게스트하우스","모텔"), graphics=FALSE, title="어떤 숙소를 원하십니까?")
+    switch (Q3_2,
+            "1" = data1[which(data1[,5]==1),],
+            "2" = data1[which(data1[,5]==2),],
+            "3" = data1[which(data1[,5]==3),],
+            "4" = data1[which(data1[,5]==4),],
+            "5" = data1[which(data1[,5]==5),]
+    )
+    
+#원하는 숙소 조건 입력(독채, 애완견, 조식제공)
+    if(Q3_2==2||Q3_2==4){
+      Q3_3<-menu(c("예","아니오"),graphics=FALSE,title="독채를 원하십니까?")
+        
+        if(Q3_3==1) data2<-data1[which(data1[,4]==1),]
+        
+      Q3_4<-menu(c("예","아니오"),graphics=FALSE,title="애완견을 동반하시나요?")
+        if(Q3_4==1) data3<-data2[which(data2[,2]==1),]
+        if(Q3_4==2) data3<-data2[which(data2[,2]==2),]
+          
+        Q3_5<-menu(c("예","아니오"),graphics=FALSE,title="조식 제공을 원하십니까?")
+          
+        if(Q3_5==1) data4<-data3[which(data3[,3]==1),]
+        if(Q3_5==2) data4<-data3[which(data3[,3]==2),]
+
+
+    
+       if(Q3_3==2)
+          data2<-data1[which(data1[,4]==2),]
+            
+      Q3_4 = menu(c("예","아니오"),graphics=FALSE,title="애완견을 동반하시나요?")
+      if(Q3_4==1) data3 <- data2[which(data2[,2]==1),]
+      if(Q3_4==2) data3 <- data2[which(data2[,2]==2),]
+      
+      Q3_5<-menu(c("예","아니오"),graphics=FALSE,title="조식 제공을 원하십니까?")
+      if(Q3_5==1) data4 <- data3[which(data3[,3]==1),]
+      if(Q3_5==2) data4 <- data3[which(data3[,3]==2),]
+
+    }
+  
+    if(Q3_2==1|Q3_2==3|Q3_2==5){
+      data2<-data1[which(data1[,5]==1),]
+      data3<-data1[which(data1[,5]==3),]
+      data4<-data1[which(data1[,5]==5),]
+    
+      Q3_5<-menu(c("예","아니오"),graphics=FALSE,title="조식 제공을 원하십니까?")
+      if(Q3_5==1) data5 <- data2[which(data2[,3]==1),]
+                  data6 <- data3[which(data3[,3]==1),]
+                  data7 <- data4[which(data4[,3]==1),]
+      if(Q3_5==2) data5 <- data2[which(data2[,3]==2),]
+                  data6 <- data3[which(data3[,3]==2),]
+                  data7 <- data4[which(data4[,3]==2),]
+    }
+    
+    
+# 다른 숙소 추천 여부 묻기
+    if(nrow(data5)==0) {
+      cat("선택하신 조건에 맞는 숙소가 없습니다. 조건을 다시 선택해주세요!","\n")
+      next
+    }
+    
+    data6 = data5[sample(nrow(data5),1),]
+    cat("선택하신 조건에 맞는 추천 숙소는 ",data6[1,1],"입니다.\n")
+    
+    Q3_6 = menu(c("예","아니오"),graphics=FALSE,title=("조건에 맞는 다른 숙소도 보길 원하시나요?"))
+    
+    if(Q3_6==1) {
+      cat(data5[,1],"\n")
+      Q3_7<-menu(c("예","아니오"), graphics=FALSE, 
+                 title=("숙소 추천 프로그램을 끝내시려면 예, 다른 조건의 숙소를 찾으려면 아니오를 눌러주세요!"))
+      if(Q3_7==1) break
+      if(Q3_7==2) next
+    }
+    
+    if(Q3_6==2) {
+      Q3_7<-menu(c("예","아니오"), graphics=FALSE, 
+                 title=("숙소 추천 프로그램을 끝내시려면 예, 다른 조건의 숙소를 찾으려면 아니오를 눌러주세요!"))
+      if(Q3_7==1) break
+      if(Q3_7==2) next
+    }
+  }
+}
+
+#관광지
+place_suggest<-function(x){
+ #원하는 관광 스타일 입력
+  JT_option = menu(c("자연경관", "박물관/체험관", "기타"), graphics=FALSE, title="원하시는 상세정보를 선택하시오")
+  
+  J_place = jeju_T[c(sample(1:(nrow(jeju_T[jeju_T[,3]==JT_option,])-1),size=3,replace=FALSE)),]
+  print(J_place)
+  answer = menu(c("1:예","2:아니오"),graphics=FALSE,title="원하시는 정보가 맞습니까?")
+  
+  if(answer==1){
+    print("행복한 여행 되세요")   
+    return(J_place)
+#다른 관광지 추천 여부 묻기
+  } else if(answer==2){
+    J_place2 = jeju_T[c(sample(1:(nrow(jeju_T[jeju_T[,3]==JT_option,])-1),size=3,replace=FALSE)),]
+    print(J_place2)
+    return(J_place2)
+ } else{
+    print("오류가 발생하여 종료합니다.")
+  }
+  return(J_place)
+}
+
+# 맛집
+food_suggest = function(x){
+ #원하는 메뉴 종류 입력
+  repeat{
+    Q5_1<-menu(c("한식","중식","일식","양식","카페"),graphics=FALSE,title="원하시는 메뉴는 무엇입니까?")
+    
+    switch(Q5_1,
+           "1" = x<-sample(1:278,5), #한식
+           "2" = x<-sample(279:289,5), #중식
+           "3" = x<-sample(290:300,5), #일식
+           "4" = x<-sample(301:312,5), #양식
+           "5" = x<-sample(313:371,5) #카페
+           )
+  
+    food_return = food[x,c(2,5,3,4,6)]
+    print(food_return)
+    
+ #다른 맛집 추천 여부 묻기
+    Q5_2<-menu(c("예","아니오"),graphics=FALSE,title=("맛집 추천을 한 번 더 받으시겠습니까?"))
+    if(Q5_2==2) break
+  } 
+  return(food_return)
+}
+
+
+
+#전체 알고리즘 실행
+
+Q1 = menu(c("예","아니오"),graphics=FALSE,title="여행 패키지를 추천 받겠습니까?")
+if(Q1==1) package_result = package()
+print(package_result)
+
+Q2 = menu(c("예","아니오"),graphics=FALSE,title="제주도로 가는 교툥편을 추천 받겠습니까?")
+if(Q2==1) {
+  Q5_1 = menu(c("항공편","배편"), graphics=FALSE, title="원하시는 교통편은 무엇입니까?")
+  travel_result = travel_method(Q5_1)
+  print(travel_result)
+}
+print(as.data.frame(travel_result))
+
+Q3 = menu(c("예","아니오"),graphics=FALSE,title="숙소를 추천 받겠습니까?")
+if(Q3==1) lodging(x)
+
+Q4 = menu(c("예","아니오"),graphics=FALSE,title="맛집을 추천 받겠습니까?")
+if (Q4==1) food_result = food_suggest()
+
+Q5 = menu(c("예","아니오"),graphics=FALSE,title="관광지를 추천 받겠습니까?")
+if (Q5==1) place_result = place_suggest()
+
+```
+
