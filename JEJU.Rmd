@@ -6,7 +6,7 @@ output: word_document
 ```{r}
 1
 #각 데이터 입력받기
-agency = read.csv("C:/Temp/comprog/agency.csv",header=T)
+agency = read.csv("agency.csv",header=T)
 agency$cost = as.integer(agency$cost)
 agency = agency[1:5]
 
